@@ -16,7 +16,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const INK = path.resolve(__dirname, '..', 'shapeshift-labs-ink-studio');
+const INK = require('./find-ink.js');
 const SH_C0 = 0.28209479177387814;
 
 function parseArgs(argv) {

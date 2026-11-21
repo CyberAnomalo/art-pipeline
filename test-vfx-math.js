@@ -4,7 +4,7 @@
  * 和 ink-studio 的权威 CPU 解算器 SplatFrames.sample(i).position() / .opacity() 比较。
  * 这样能在不开 GPU 的情况下抓出公式错误（比如赋值顺序、用了改写后的 x）。
  */
-const INK = 'D:/GithubSoftware/GameDev/shapeshift-labs-ink-studio';
+const INK = require('./find-ink.js');
 const path = require('path');
 const lib = require(INK + '/index.js').load();
 const KIT = lib.KIT;

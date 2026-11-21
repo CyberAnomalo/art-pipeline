@@ -1,5 +1,5 @@
 const path=require('path');
-const INK=path.resolve('..','shapeshift-labs-ink-studio');
+const INK = require('./find-ink.js');
 const lib=require(path.join(INK,'index.js')).load();
 const sc=lib.SCENES.find(s=>s.id==='watcher');
 const W=sc.build(sc.seed);

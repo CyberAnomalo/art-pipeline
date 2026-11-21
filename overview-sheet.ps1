@@ -1,9 +1,14 @@
 # 把七个 diorama 的抓图拼成一张总览表，同时逐个做调色板断言。
 # 断言：图内（除背景清屏色外）没有任何颜色落在调色板之外。
 
+param(
+  # 默认取兄弟目录 ../ink2godot，也可以 -Project 指定
+  [string]$Project = (Join-Path (Split-Path $PSScriptRoot -Parent) 'ink2godot')
+)
+
 Add-Type -AssemblyName System.Drawing
 
-$proj = "D:/GithubSoftware/GameDev/ink2godot"
+$proj = $Project
 $ids = @("watcher", "burn", "idol", "bench", "stuff", "cabinet", "rehearsal")
 $cols = 4
 $cellW = 640

@@ -1,5 +1,5 @@
 /* 实测例子场景的动画构成：kind 直方图 + 骨骼/部件绑定 */
-const INK = 'D:/GithubSoftware/GameDev/shapeshift-labs-ink-studio';
+const INK = require('./find-ink.js');
 const path = require('path');
 const lib = require(INK + '/index.js').load();
 const KIT = lib.KIT;

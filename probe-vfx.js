@@ -1,5 +1,5 @@
 /* 普查：哪些 ink-studio 场景在用非骨骼的程序化动画（kind 1,2,3,5,6,7,8,9,10,11,14,15）*/
-const INK = 'D:/GithubSoftware/GameDev/shapeshift-labs-ink-studio';
+const INK = require('./find-ink.js');
 const fs = require('fs');
 const path = require('path');
 const lib = require(INK + '/index.js').load();

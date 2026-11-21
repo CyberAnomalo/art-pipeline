@@ -1,5 +1,5 @@
 /* 验证：anim.update(dt,t) 是否真的推进骨骼 + 统计每根骨承载的 splat 数 */
-const INK = 'D:/GithubSoftware/GameDev/shapeshift-labs-ink-studio';
+const INK = require('./find-ink.js');
 const path = require('path');
 const lib = require(INK + '/index.js').load();
 const KIT = lib.KIT;

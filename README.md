@@ -27,8 +27,8 @@ node inkstudio2ply-boned.js --example pose-blocking.js --out ../ink2godot/assets
 
 ```powershell
 # VFX 数学等价：JS 版 ink_anim 逐行对照 ink-studio 的 SplatFrames.sample()
-# 六个场景 ~46 万 splat，位置/不透明度/协方差误差必须全是 0.000e+0
-node test-vfx-math.js
+node test-vfx-math.js                  # 单个场景（默认 motion-cadence）
+./verify-all.ps1                       # 六个场景一起，~46 万 splat
 
 # 探针
 node probe-dioramas.js   # 七个场景的相机/半径/调色板/splat 数
@@ -37,7 +37,8 @@ node probe-anim.js       # 各示例的骨骼/kind 组成
 node probe-pal.js        # 调色板字节序验证
 
 # 总览表 + 调色板断言（需要 ../ink2godot 先抓图）
-./overview-sheet.ps1
+./overview-sheet.ps1                             # 默认找 ../ink2godot
+./overview-sheet.ps1 -Project D:/other/ink2godot # 或指定
 ```
 
 ## 文档
@@ -58,4 +59,13 @@ GameDev/
   ink2godot/                        <- Godot 工程
 ```
 
-导出器用 `path.resolve(__dirname, '..', 'shapeshift-labs-ink-studio')` 定位它。
+所有脚本用 `find-ink.js` 定位它，顺序是：环境变量 `INK_STUDIO_DIR` → 父目录/祖父目录下的
+`shapeshift-labs-ink-studio` 或 `ink-studio`。都找不到会给出可操作的提示，而不是一个 ENOENT 栈。
+
+```powershell
+$env:INK_STUDIO_DIR = "D:/somewhere/ink-studio"   # 放在非兄弟位置时用这个
+```
+
+ink-studio **无需构建**：`index.js` 会自己把源码拼成 `dist/standalone.js`。
+
+> 只是想看画面/做关卡的人不需要本仓库。看 [`../ink2godot/ONBOARDING.md`](../ink2godot/ONBOARDING.md)。

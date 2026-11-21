@@ -1,5 +1,5 @@
 /* 诊断：对比 an.update(0,0) 与 CLI 权威路径 diarama-pose.pose() 的骨骼矩阵 */
-const INK = 'D:/GithubSoftware/GameDev/shapeshift-labs-ink-studio';
+const INK = require('./find-ink.js');
 const path = require('path');
 const lib = require(INK + '/index.js').load();
 const KIT = lib.KIT;
