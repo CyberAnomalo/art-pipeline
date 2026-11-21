@@ -24,7 +24,7 @@ $brush = [System.Drawing.Brushes]::Gainsboro
 $i = 0
 $report = @()
 foreach ($id in $ids) {
-  $png = "$proj/overview_$id.png"
+  $png = "$proj/artifacts/overview_$id.png"
   $json = "$proj/assets/dioramas/$id.ply.json"
   if (-not (Test-Path $png)) { Write-Warning "缺图: $png"; continue }
 
@@ -79,7 +79,7 @@ foreach ($id in $ids) {
 }
 
 $canvas.Dispose()
-$out = "$proj/overview_sheet.png"
+$out = "$proj/artifacts/overview_sheet.png"
 $sheet.Save($out, [System.Drawing.Imaging.ImageFormat]::Png)
 $sheet.Dispose()
 
