@@ -1,0 +1,8 @@
+# 导出器中间产物：与 ink2godot/assets/ 重复，随时可重新生成
+out/
+
+node_modules/
+*.log
+
+# 临时探针s
+scratch/

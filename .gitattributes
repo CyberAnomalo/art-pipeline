@@ -1,0 +1,10 @@
+* text=auto eol=lf
+
+# 二进制产物
+*.ply binary
+*.png binary
+*.sog binary
+
+*.md text eol=lf
+*.js text eol=lf
+*.ps1 text eol=crlf
