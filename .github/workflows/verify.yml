@@ -1,0 +1,91 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# The real gate for this repo is numerical, not visual: the renderer-side GLSL animation
+# function must stay a line-for-line equivalent of ink-studio's own CPU solver. Any drift
+# shows up as a non-zero error here, or as a splat-count change in the exported PLY.
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      # Pinned by full SHA: ink-studio is `private: true` in package.json with no semver,
+      # and GitHub only serves arbitrary commits when asked by full SHA.
+      # Keep in sync with VERSIONS.md.
+      INK_SHA: 1350b4f2c57870551cb2cd33ba823f9929d502a9
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch ink-studio at pinned commit
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dir = "$env:RUNNER_TEMP\ink-studio"
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          git -C $dir init -q
+          git -C $dir remote add origin https://github.com/siliconjungle/shapeshift-labs-ink-studio.git
+          git -C $dir fetch -q --depth 1 origin $env:INK_SHA
+          if ($LASTEXITCODE -ne 0) { throw "cannot fetch $env:INK_SHA -- was the pin rewritten upstream?" }
+          git -C $dir checkout -q FETCH_HEAD
+          $head = (git -C $dir rev-parse HEAD).Trim()
+          if ($head -ne $env:INK_SHA) { throw "expected $env:INK_SHA, got $head" }
+          Write-Host "ink-studio @ $head"
+          "INK_STUDIO_DIR=$dir" >> $env:GITHUB_ENV
+
+      - name: Toolchain
+        shell: pwsh
+        run: node --version
+
+      - name: VFX shader equivalence (must be exactly zero)
+        shell: pwsh
+        run: |
+          # ./verify-all.ps1 exits 1 if any scene drifts. Each scene compares position,
+          # opacity and covariance against ink-studio's SplatFrames.sample() over several
+          # timestamps, covering 461,535 splats.
+          & ./verify-all.ps1
+          if ($LASTEXITCODE -ne 0) { throw "VFX equivalence failed" }
+
+      - name: Export a static scene
+        shell: pwsh
+        run: |
+          $out = 'out/ci-static.ply'
+          $log = (& node inkstudio2ply.js --scene rehearsal --out $out --stats 2>&1 | Out-String)
+          if ($LASTEXITCODE -ne 0) { Write-Host $log; throw "export failed" }
+          if (-not (Test-Path $out)) { throw "no PLY written" }
+          # Assert against the sidecar, not stdout: the artifact is the real contract.
+          $meta = Get-Content "$out.json" -Raw | ConvertFrom-Json
+          Write-Host "$($meta.count) splats, $($meta.paletteUsed) colours, $((Get-Item $out).Length) bytes"
+          # A silent scene change moves this number; it is the canary.
+          if ($meta.count -ne 15605) { throw "rehearsal splat count changed: $($meta.count) (expected 15605)" }
+
+      - name: Export a rigged character
+        shell: pwsh
+        run: |
+          # Covers the bone-split path and its reconstruction self-check.
+          $log = (& node inkstudio2ply-boned.js --example pose-blocking.js --out out/courier-ci --fps 24 --seconds 2 2>&1 | Out-String)
+          if ($LASTEXITCODE -ne 0) { Write-Host $log; throw "boned export failed" }
+          $anim = Get-Content out/courier-ci/anim.json -Raw | ConvertFrom-Json
+          $err = [double]$anim.selfCheck.maxReconstructionError
+          Write-Host "$($anim.boneCount) bones, $($anim.frameCount) frames, self-check $err"
+          if ($err -gt 1e-5) { throw "bone reconstruction error too large: $err" }
+          if ($anim.boneCount -ne 10) { throw "expected 10 bones, got $($anim.boneCount)" }
+          if ($anim.frameCount -ne 48) { throw "expected 48 frames, got $($anim.frameCount)" }
+          $bones = @(Get-ChildItem out/courier-ci -Filter 'bone_*.ply' -ErrorAction SilentlyContinue)
+          if ($bones.Count -ne 10) { throw "expected 10 per-bone PLYs, got $($bones.Count)" }
+
+      - name: Summary
+        if: always()
+        shell: pwsh
+        run: |
+          @(
+            '| check | result |',
+            '|---|---|',
+            "| VFX equivalence (461,535 splats) | $('${{ job.status }}') |"
+          ) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8

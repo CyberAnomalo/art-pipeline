@@ -1,5 +1,7 @@
 # art-pipeline
 
+[![verify](https://github.com/CyberAnomalo/art-pipeline/actions/workflows/verify.yml/badge.svg)](https://github.com/CyberAnomalo/art-pipeline/actions/workflows/verify.yml)
+
 **Bake pixel-art Gaussian-splat scenes into Gaussian `.ply` files that any 3DGS renderer can load.**
 
 [中文](README.zh-CN.md) · [Spec](SPEC-inkstudio-to-godot-ply.md) · [Versions](VERSIONS.md)
